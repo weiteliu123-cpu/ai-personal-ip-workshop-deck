@@ -1,0 +1,308 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI × 个人IP 线下共创局</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#030712;--panel:rgba(8,15,30,.78);--text:#f8fbff;--sub:#a9b6c9;
+      --cyan:#00e5ff;--green:#39ff88;--pink:#ff3df2;--amber:#ffd166;
+      --font-display:"Rajdhani","Noto Sans SC",sans-serif;--font-body:"Noto Sans SC",sans-serif;
+      --title:clamp(2.2rem,6vw,6.2rem);--h2:clamp(1.6rem,3.8vw,3.7rem);
+      --h3:clamp(1.05rem,2.1vw,1.7rem);--body:clamp(.82rem,1.45vw,1.12rem);
+      --small:clamp(.68rem,1vw,.9rem);--pad:clamp(1rem,3.8vw,4rem);
+      --ease:cubic-bezier(.16,1,.3,1);
+    }
+    html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--font-body);color:var(--text)}
+    canvas#stars{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.85}
+    .deck{position:fixed;inset:0;overflow:hidden;background:
+      radial-gradient(circle at 20% 16%,rgba(0,229,255,.22),transparent 30%),
+      radial-gradient(circle at 82% 24%,rgba(255,61,242,.18),transparent 28%),
+      radial-gradient(circle at 58% 88%,rgba(57,255,136,.16),transparent 28%),
+      linear-gradient(135deg,#020617,#07111f 55%,#030712)}
+    .deck:after{content:"";position:absolute;inset:-40%;background:
+      linear-gradient(90deg,transparent 0 48%,rgba(0,229,255,.10) 49% 50%,transparent 51%),
+      linear-gradient(0deg,transparent 0 48%,rgba(0,229,255,.06) 49% 50%,transparent 51%);
+      background-size:80px 80px;transform:perspective(900px) rotateX(64deg) translateY(12%);
+      transform-origin:center bottom;animation:gridMove 12s linear infinite;z-index:0;opacity:.7}
+    .slide{position:absolute;inset:0;z-index:2;width:100vw;height:100vh;height:100dvh;overflow:hidden;
+      padding:var(--pad);display:flex;flex-direction:column;justify-content:center;
+      transform:translateX(110%);opacity:0;transition:transform .72s var(--ease),opacity .5s ease}
+    .slide.active{transform:translateX(0);opacity:1;z-index:4}
+    .slide.prev{transform:translateX(-110%);opacity:0;z-index:3}
+    .slide.next{transform:translateX(110%);opacity:0;z-index:3}
+    h1{font-family:var(--font-display);font-size:var(--title);line-height:.92;text-transform:uppercase;letter-spacing:.01em;max-width:980px}
+    h2{font-size:var(--h2);line-height:1.08;max-width:1120px}
+    h3{font-size:var(--h3);line-height:1.18;margin-bottom:.45rem}
+    p{font-size:var(--body);line-height:1.62;color:var(--sub);max-width:940px}
+    .accent{color:var(--cyan);text-shadow:0 0 28px rgba(0,229,255,.55)}.green{color:var(--green)}.pink{color:var(--pink)}.amber{color:var(--amber)}
+    .eyebrow{width:max-content;max-width:90vw;margin-bottom:clamp(.7rem,1.6vw,1.2rem);font-family:var(--font-display);font-size:var(--small);letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);border:1px solid rgba(0,229,255,.32);background:rgba(0,229,255,.08);border-radius:999px;padding:.42rem .72rem}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,3vw,3rem);align-items:center;width:min(100%,1180px)}
+    .three{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.7rem,1.5vw,1.1rem);width:min(100%,1140px)}
+    .four{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.55rem,1.1vw,.9rem);width:min(100%,1180px)}
+    .panel{border:1px solid rgba(0,229,255,.22);background:linear-gradient(180deg,rgba(8,15,30,.86),rgba(8,20,38,.66));border-radius:clamp(.8rem,1.5vw,1.2rem);padding:clamp(.85rem,1.7vw,1.35rem);box-shadow:0 18px 70px rgba(0,0,0,.35),inset 0 0 28px rgba(0,229,255,.05);backdrop-filter:blur(14px)}
+    .mini{font-size:var(--small);line-height:1.45;color:var(--sub)}
+    .chips{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:clamp(.9rem,1.7vw,1.2rem)}.chip{font-size:var(--small);border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);border-radius:999px;padding:.45rem .78rem;color:var(--text)}
+    .hero-orb{position:absolute;right:8vw;top:18vh;width:min(34vw,460px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 38% 35%,#fff,rgba(0,229,255,.9) 12%,rgba(255,61,242,.45) 32%,rgba(57,255,136,.18) 54%,transparent 70%);box-shadow:0 0 90px rgba(0,229,255,.5),0 0 160px rgba(255,61,242,.25);animation:floatOrb 5s ease-in-out infinite;z-index:-1}
+    .hero-orb:after{content:"";position:absolute;inset:14%;border:1px solid rgba(255,255,255,.34);border-radius:50%;animation:spin 8s linear infinite}
+    .terminal{font-family:var(--font-display);font-size:clamp(.78rem,1.2vw,.98rem);line-height:1.8;color:#e9fdff;background:rgba(1,7,14,.88);border:1px solid rgba(0,229,255,.28);border-radius:1rem;padding:clamp(.9rem,1.7vw,1.2rem);box-shadow:inset 0 0 30px rgba(0,229,255,.08),0 0 70px rgba(0,229,255,.12)}
+    .cursor{display:inline-block;width:.6em;height:1em;background:var(--green);vertical-align:-.15em;animation:blink .9s steps(2,start) infinite}
+    .case-wall{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(.45rem,1vw,.75rem);width:min(100%,1180px);align-items:center}
+    .case-card{position:relative;border-radius:1rem;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:#111827;box-shadow:0 20px 70px rgba(0,0,0,.35);transform:rotate(var(--rot));animation:caseFloat 4.8s ease-in-out infinite;animation-delay:var(--delay)}
+    .case-card img{width:100%;height:clamp(11rem,42vh,28rem);object-fit:contain;background:#f7f1e6;display:block;filter:saturate(1.08) contrast(1.04)}
+    .case-card:after{content:attr(data-label);position:absolute;left:.55rem;right:.55rem;bottom:.55rem;background:rgba(2,6,23,.72);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px);border-radius:.7rem;padding:.45rem .55rem;font-size:var(--small);color:#fff}
+    .case-card.tall,.case-card.mid,.case-card.wide{grid-column:span 2}
+    .phone{width:min(31vw,320px);aspect-ratio:9/16;border:1px solid rgba(255,255,255,.2);border-radius:1.7rem;background:linear-gradient(180deg,#0f172a,#020617);padding:.62rem;box-shadow:0 0 80px rgba(0,229,255,.18);position:relative;overflow:hidden}
+    .phone-screen{height:100%;border-radius:1.12rem;background:#f8f4ea;overflow:hidden;display:grid;place-items:center}.phone-screen img{width:100%;height:100%;object-fit:contain;background:#f8f4ea}
+    .phone:before{content:"";position:absolute;left:34%;right:34%;top:.38rem;height:.24rem;border-radius:999px;background:rgba(255,255,255,.35);z-index:2}
+    .video-sim{height:clamp(17rem,47vh,30rem);border-radius:1.2rem;overflow:hidden;position:relative;background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(255,61,242,.1));border:1px solid rgba(0,229,255,.25)}
+    .video-sim .track{position:absolute;inset:0;display:flex;gap:1rem;align-items:center;animation:slideTrack 18s linear infinite;padding:1rem}
+    .video-sim img{height:86%;aspect-ratio:3/4;object-fit:contain;background:#f7f1e6;border-radius:1rem;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+    .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;width:min(100%,1160px)}.step{position:relative;min-height:clamp(6rem,16vh,8.2rem);border:1px solid rgba(0,229,255,.22);background:rgba(8,18,34,.78);border-radius:1rem;padding:clamp(.75rem,1.4vw,1rem);overflow:hidden}.step:before{content:"";position:absolute;left:-80%;top:0;width:80%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,229,255,.18),transparent);animation:sweep 3.8s infinite}.step strong{display:block;color:var(--cyan);font-family:var(--font-display);font-size:clamp(.9rem,1.5vw,1.15rem);margin-bottom:.45rem}.step span{font-size:var(--small);line-height:1.38;color:var(--sub)}
+    .agent-map{position:relative;height:clamp(22rem,62vh,38rem);width:min(100%,1080px)}.node{position:absolute;width:clamp(8rem,15vw,13rem);min-height:clamp(4.8rem,9vh,6rem);display:grid;place-items:center;text-align:center;border:1px solid rgba(0,229,255,.28);background:rgba(8,20,38,.82);border-radius:1rem;padding:.8rem;box-shadow:0 0 45px rgba(0,229,255,.12)}.node.core{left:50%;top:50%;transform:translate(-50%,-50%);border-color:rgba(57,255,136,.5);box-shadow:0 0 90px rgba(57,255,136,.22);font-weight:900;color:var(--green)}.node.n1{left:6%;top:8%}.node.n2{right:6%;top:8%}.node.n3{left:6%;bottom:8%}.node.n4{right:6%;bottom:8%}.beam{position:absolute;left:50%;top:50%;width:38%;height:2px;background:linear-gradient(90deg,rgba(0,229,255,0),var(--cyan),rgba(0,229,255,0));transform-origin:left center;animation:beam 2.2s ease-in-out infinite}.beam.b1{transform:rotate(210deg)}.beam.b2{transform:rotate(330deg)}.beam.b3{transform:rotate(145deg)}.beam.b4{transform:rotate(35deg)}
+    .metric{font-family:var(--font-display);font-size:clamp(2.2rem,5vw,5rem);color:var(--green);line-height:.9;text-shadow:0 0 35px rgba(57,255,136,.35)}.label{font-size:var(--small);color:var(--sub);margin-top:.45rem}
+    .progress{position:fixed;left:0;top:0;height:4px;width:0;background:linear-gradient(90deg,var(--cyan),var(--pink),var(--green));z-index:20;box-shadow:0 0 24px rgba(0,229,255,.6)}.counter{position:fixed;right:1.2rem;bottom:1rem;z-index:20;color:rgba(255,255,255,.55);font-family:var(--font-display);font-size:var(--small)}.hint{position:fixed;left:1.2rem;bottom:1rem;z-index:20;color:rgba(255,255,255,.42);font-size:var(--small)}
+    .nav{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:20}.dot{width:.55rem;height:.55rem;border-radius:999px;border:1px solid rgba(0,229,255,.5);background:transparent}.dot.active{background:var(--cyan);box-shadow:0 0 18px rgba(0,229,255,.8);transform:scale(1.45)}
+    @keyframes gridMove{to{background-position:0 80px,80px 0}}@keyframes floatOrb{50%{transform:translateY(-18px) scale(1.03)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes blink{50%{opacity:0}}@keyframes caseFloat{50%{transform:translateY(-10px) rotate(var(--rot))}}@keyframes slideTrack{to{transform:translateX(-52%)}}@keyframes sweep{0%{left:-80%}55%,100%{left:120%}}@keyframes beam{50%{filter:brightness(2);opacity:.35}}
+    @media(max-width:820px){.two,.three,.four,.flow{grid-template-columns:1fr}.case-wall{grid-template-columns:1fr 1fr}.case-card.tall,.case-card.mid,.case-card.wide{grid-column:span 1}.hero-orb{display:none}.agent-map{height:60vh}.node{width:38vw}.hint,.nav{display:none}.phone{width:min(58vw,320px)}}
+    @media(max-height:700px){.case-card img{height:38vh}.video-sim{height:42vh}.agent-map{height:58vh}}
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+  <div class="deck" id="deck">
+    <div class="progress" id="progress"></div>
+    <div class="hint">Space / ← → 翻页</div>
+    <div class="counter" id="counter">01 / 12</div>
+    <nav class="nav" id="nav"></nav>
+
+    <section class="slide active">
+      <div class="hero-orb"></div>
+      <div class="eyebrow">LIVE AI CONTENT LAB</div>
+      <h1>AI ×<br><span class="accent">个人IP</span></h1>
+      <p>把 AI 变成你的内容合伙人：现场拆方向、拆选题、生成第一篇小红书笔记。</p>
+      <div class="chips"><span class="chip">不是听课</span><span class="chip">现场共创</span><span class="chip">带走可发布雏形</span></div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">WHY THIS ROOM</div>
+      <h2>这场不是“AI工具课”，是一次内容实战实验</h2>
+      <div class="three">
+        <div class="panel"><h3 class="accent">真实状态</h3><p>gap、转型、副业、回国、重新看方向。内容必须从真实状态里长出来。</p></div>
+        <div class="panel"><h3 class="green">真实案例</h3><p>用阿文账号已经跑过的帖子，拆“内容如何带来私信和线下关系”。</p></div>
+        <div class="panel"><h3 class="pink">真实产出</h3><p>不只听概念。每个人现场生成一篇自己的笔记雏形。</p></div>
+      </div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">CASE WALL</div>
+      <h2>从真实小局看：内容如何变成一次线下连接</h2>
+      <div class="case-wall">
+        <div class="case-card tall" style="--rot:-2deg;--delay:.1s" data-label="第一步：用一个真实问题发起邀约"><img src="assets-v2/lunch-invite-cover.jpg" alt="午饭局邀约"></div>
+        <div class="case-card mid" style="--rot:1.5deg;--delay:.4s" data-label="第二步：见面后把讨论变成内容"><img src="assets-v2/lunch-recap-cover.jpg" alt="午饭复盘"></div>
+        <div class="case-card wide" style="--rot:-1deg;--delay:.7s" data-label="第三步：保护隐私，也保留现场感"><img src="assets-v2/lunch-cartoon.png" alt="卡通合照"></div>
+      </div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">CONTENT REEL</div>
+      <h2>一条内容，不是发完就结束</h2>
+      <div class="video-sim">
+        <div class="track">
+          <img src="assets-v2/lunch-invite-cover.jpg" alt="午饭局邀约">
+          <img src="assets-v2/lunch-recap-cover.jpg" alt="午饭复盘">
+          <img src="assets-v2/case-lunch-real-question.jpg" alt="真实问题">
+          <img src="assets-v2/case-lunch-ideas-hard.jpg" alt="想法很难">
+          <img src="assets-v2/case-lunch-low-cost.jpg" alt="低成本试错">
+          <img src="assets-v2/case-dont-open-shop.jpg" alt="别急着开店">
+          <img src="assets-v2/case-track-ladder.jpg" alt="爬梯子还是换赛道">
+          <img src="assets-v2/case-track-question.jpg" alt="换赛道问题">
+          <img src="assets-v2/case-foreign-insurance.jpg" alt="外资保险销售">
+          <img src="assets-v2/ai-event-poster.jpg" alt="AI活动海报">
+          <img src="assets-v2/first-post-cover.jpg" alt="第一篇小红书">
+          <img src="assets-v2/invite-card-address.jpg" alt="邀约卡">
+          <img src="assets-v2/lunch-invite-cover.jpg" alt="午饭局邀约">
+          <img src="assets-v2/lunch-recap-cover.jpg" alt="午饭复盘">
+          <img src="assets-v2/case-lunch-real-question.jpg" alt="真实问题">
+          <img src="assets-v2/case-lunch-ideas-hard.jpg" alt="想法很难">
+          <img src="assets-v2/case-lunch-low-cost.jpg" alt="低成本试错">
+          <img src="assets-v2/case-dont-open-shop.jpg" alt="别急着开店">
+          <img src="assets-v2/case-track-ladder.jpg" alt="爬梯子还是换赛道">
+          <img src="assets-v2/case-track-question.jpg" alt="换赛道问题">
+          <img src="assets-v2/case-foreign-insurance.jpg" alt="外资保险销售">
+          <img src="assets-v2/ai-event-poster.jpg" alt="AI活动海报">
+          <img src="assets-v2/first-post-cover.jpg" alt="第一篇小红书">
+          <img src="assets-v2/invite-card-address.jpg" alt="邀约卡">
+        </div>
+      </div>
+      <p style="margin-top:1rem">内容发布 → 评论 → 私信 → 筛选 → 邀约卡 → 线下见面 → 复盘再发。</p>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">DATA SIGNAL</div>
+      <h2>小账号冷启动，先看“信号”，不是只看爆款</h2>
+      <div class="four">
+        <div class="panel"><div class="metric">677</div><div class="label">午饭局浏览</div></div>
+        <div class="panel"><div class="metric">56</div><div class="label">评论互动</div></div>
+        <div class="panel"><div class="metric">4</div><div class="label">第一场线下见面</div></div>
+        <div class="panel"><div class="metric">7</div><div class="label">AI小局当前人数</div></div>
+      </div>
+      <p style="margin-top:1rem">真正重要的是：什么内容能让陌生人愿意开口，什么私信能把关系推进一步。</p>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">LLM VS AGENT</div>
+      <h2>大模型是大脑，Agent 是会做事的工作流</h2>
+      <div class="two">
+        <div class="panel"><h3 class="accent">大模型</h3><p>你问，它答。适合写标题、改正文、总结评论、生成想法。</p><div class="terminal" style="margin-top:1rem">&gt; 帮我写一篇小红书<br>&gt; 给我10个标题<br>&gt; 改得更像真人</div></div>
+        <div class="panel"><h3 class="green">AI Agent</h3><p>它能按目标拆任务，调用工具，连续完成一套工作。</p><div class="terminal" style="margin-top:1rem">&gt; 找对标账号<br>&gt; 分析评论需求<br>&gt; 生成封面 + 文案 + 私信<br>&gt; 发后复盘下一篇 <span class="cursor"></span></div></div>
+      </div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">AGENT MAP</div>
+      <h2>你的自媒体 Agent，不是一个工具，而是一组分工</h2>
+      <div class="agent-map">
+        <div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div><div class="beam b4"></div>
+        <div class="node core">内容指挥中心<br>你本人</div>
+        <div class="node n1">选题雷达<br><span class="mini">找需求</span></div>
+        <div class="node n2">文案助手<br><span class="mini">生成草稿</span></div>
+        <div class="node n3">视觉助手<br><span class="mini">封面/卡片</span></div>
+        <div class="node n4">复盘助手<br><span class="mini">看数据</span></div>
+      </div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">MY DAILY WORKFLOW</div>
+      <h2>我每天用 AI 跑的自媒体闭环</h2>
+      <div class="flow">
+        <div class="step"><strong>01 对标账号</strong><span>找同城/同人群/同主题里最近有互动的内容</span></div>
+        <div class="step"><strong>02 评论采样</strong><span>看用户真实在问什么，而不是自己想讲什么</span></div>
+        <div class="step"><strong>03 生成内容</strong><span>标题、正文、封面字、标签、置顶评论</span></div>
+        <div class="step"><strong>04 私信承接</strong><span>根据对方状态定回复，不群发硬推</span></div>
+        <div class="step"><strong>05 复盘迭代</strong><span>下一篇不是凭感觉，是基于反馈继续发</span></div>
+      </div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">PROMPT LIVE</div>
+      <h2>现场可以直接这样让 AI 开始工作</h2>
+      <div class="terminal">
+        你是我的小红书内容合伙人。<br>
+        我的状态是：____。过去经历：____。我想吸引的人：____。<br>
+        请帮我拆出：3个适合我的内容方向、5个选题、1篇第一篇笔记草稿。<br>
+        要求：真实、有画面感、不要像招生广告，不要像老师点评。<br>
+        最后给我：标题、正文、封面大字、评论区引导、私信承接话术。<span class="cursor"></span>
+      </div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">CASE DEEP DIVE</div>
+      <h2>案例：午饭局为什么能约到人</h2>
+      <div class="two">
+        <div class="phone"><div class="phone-screen"><img src="assets-v2/lunch-invite-cover.jpg" alt="午饭局封面"></div></div>
+        <div class="panel">
+          <div class="step"><strong>不是“我要办活动”</strong><span>而是“我也在重新看方向，想约几个人聊真话”。</span></div>
+          <div class="step" style="margin-top:.8rem"><strong>不是大而全</strong><span>4-6个人、小范围、不正式，降低心理压力。</span></div>
+          <div class="step" style="margin-top:.8rem"><strong>不是直接卖</strong><span>先建立关系，再自然产生后续连接。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">CASE DEEP DIVE</div>
+      <h2>案例：AI活动为什么要从“第一篇”切入</h2>
+      <div class="two">
+        <div class="panel">
+          <h3 class="accent">“AI × 个人IP”太大</h3>
+          <p>用户不知道自己来完能拿走什么，所以转化弱。</p>
+          <br>
+          <h3 class="green">“拆出第一篇小红书”更具体</h3>
+          <p>用户知道这场小局解决的是一个眼前卡点。</p>
+        </div>
+        <div class="phone"><div class="phone-screen"><img src="assets-v2/first-post-cover.jpg" alt="第一篇封面"></div></div>
+      </div>
+    </section>
+
+    <section class="slide next">
+      <div class="eyebrow">FINAL OUTPUT</div>
+      <h2>今天的产出不是“学会AI”，而是开始拥有自己的内容机器</h2>
+      <div class="three">
+        <div class="panel"><h3>一个方向</h3><p>你可以持续讲什么。</p></div>
+        <div class="panel"><h3>一组选题</h3><p>未来 7 天可以怎么发。</p></div>
+        <div class="panel"><h3>一篇雏形</h3><p>回去可以直接改完发布。</p></div>
+      </div>
+      <div class="chips"><span class="chip">阿文不小了</span><span class="chip">AI个人IP共创局</span><span class="chip">把AI变成长期队友</span></div>
+    </section>
+  </div>
+
+  <script>
+    class Deck{
+      constructor(){
+        this.slides=[...document.querySelectorAll('.slide')];
+        this.i=0;
+        this.progress=document.getElementById('progress');
+        this.counter=document.getElementById('counter');
+        this.nav=document.getElementById('nav');
+        this.buildNav();this.keys();this.touch();this.wheel();this.update();
+      }
+      buildNav(){
+        this.nav.innerHTML='';
+        this.slides.forEach((_,idx)=>{
+          const b=document.createElement('button');
+          b.className='dot';
+          b.addEventListener('click',()=>this.go(idx));
+          this.nav.appendChild(b);
+        });
+      }
+      go(n){
+        this.i=Math.max(0,Math.min(n,this.slides.length-1));
+        this.update();
+      }
+      keys(){
+        document.addEventListener('keydown',e=>{
+          if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();this.go(this.i+1)}
+          if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();this.go(this.i-1)}
+        });
+      }
+      touch(){
+        let x=0;
+        addEventListener('touchstart',e=>x=e.touches[0].clientX,{passive:true});
+        addEventListener('touchend',e=>{const d=x-e.changedTouches[0].clientX;if(Math.abs(d)>45)this.go(d>0?this.i+1:this.i-1)},{passive:true});
+      }
+      wheel(){
+        let lock=false;
+        addEventListener('wheel',e=>{
+          const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+          if(lock||Math.abs(delta)<18)return;
+          lock=true;this.go(delta>0?this.i+1:this.i-1);
+          setTimeout(()=>lock=false,650);
+        },{passive:true});
+      }
+      update(){
+        this.slides.forEach((s,idx)=>{
+          s.classList.toggle('active',idx===this.i);
+          s.classList.toggle('prev',idx<this.i);
+          s.classList.toggle('next',idx>this.i);
+        });
+        this.progress.style.width=((this.i+1)/this.slides.length*100)+'%';
+        this.counter.textContent=String(this.i+1).padStart(2,'0')+' / '+String(this.slides.length).padStart(2,'0');
+        [...this.nav.children].forEach((d,idx)=>d.classList.toggle('active',idx===this.i));
+      }
+    }
+    class Stars{
+      constructor(){this.c=document.getElementById('stars');this.x=this.c.getContext('2d');this.resize();this.make();addEventListener('resize',()=>{this.resize();this.make()});this.draw()}
+      resize(){this.c.width=innerWidth*devicePixelRatio;this.c.height=innerHeight*devicePixelRatio;this.c.style.width=innerWidth+'px';this.c.style.height=innerHeight+'px';this.x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
+      make(){let n=Math.min(90,Math.max(48,Math.floor(innerWidth/18)));this.p=Array.from({length:n},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:1+Math.random()*2}))}
+      draw(){let x=this.x;x.clearRect(0,0,innerWidth,innerHeight);this.p.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>innerWidth)p.vx*=-1;if(p.y<0||p.y>innerHeight)p.vy*=-1});for(let i=0;i<this.p.length;i++){for(let j=i+1;j<this.p.length;j++){let a=this.p[i],b=this.p[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<145){x.strokeStyle=`rgba(0,229,255,${.18*(1-d/145)})`;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}}this.p.forEach(p=>{x.fillStyle='rgba(57,255,136,.65)';x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fill()});requestAnimationFrame(()=>this.draw())}
+    }
+    new Deck();new Stars();
+  </script>
+</body>
+</html>
+
